@@ -13,7 +13,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
 plt.style.use("ggplot")
+sns.set_style({'axes.grid': False})
 
 # In[2]:
 fig, ax = plt.subplots(figsize = (5, 3))
@@ -169,4 +171,43 @@ fig2 = plt.figure(figsize = (7, 7))
 ax2 = Axes3D(fig2)
 
 # Surface plot
-ax2.plot_surface(T1, T2, X, rstride = 5, cstride = 5, cmap = "jet", alpha = 0.5)
+ax2.plot_surface(T1, T2, Z, rstride = 5, cstride = 5, cmap = "jet", alpha = 0.5)
+
+ax2.set_xlabel("theta 1")
+ax2.set_ylabel("theta 2")
+ax2.set_zlabel("error")
+ax2.set_title("RSS gradient descent")
+ax2.view_init(45, -45)
+
+# Create animation
+line, = ax2.plot([], [], [], "r-", label = "Gradient Descent", lw = 1.5)
+point, = ax2.plot([], [], [], "*", color = "red")
+display_value = ax2.text(2., 2., 27.5, " ", transform = ax1.transAxes)
+
+def init_2():
+    line.set_data([], [])
+    line.set_3d_properties([])
+    point.set_data([], [])
+    point.set_3d_properties([])
+    display_value.set_text(" ")
+    return line, point, display_value
+
+def animate_2(i):
+    # Animate line
+    line.set_data(theta_0[:i], theta_1[:i])
+    line.set_3d_properties(J_history_reg[:i])
+    
+    # Animate points
+    point.set_data(theta_0[i], theta_1[i])
+    point.set_3d_properties(J_history_reg[i])
+    
+    # Animate display value
+    display_value.set_text("Min = " + str(J_history_reg[i]))
+    
+    return line, point, display_value
+
+ax2.legend(loc = 1)
+
+anim2 = FuncAnimation(fig2, animate_2, init_func = init_2, frames = len(theta_0), interval = 120, repeat_delay = 60, blit = True)
+
+plt.show()
